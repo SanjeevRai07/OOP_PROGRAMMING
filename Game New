@@ -1,0 +1,158 @@
+import java.util.Scanner;
+import java.util.Random;
+
+public class TicTacToe {
+    private static final char EMPTY = ' ';
+    private static final char HUMAN = 'X';
+    private static final char AI = 'O';
+    private char[][] board = new char[3][3];
+    private Scanner scanner = new Scanner(System.in);
+    private Random rand = new Random();
+
+    public TicTacToe() {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                board[i][j] = EMPTY;
+    }
+
+    // Print board with indices for user convenience
+    private void printBoard() {
+        System.out.println();
+        System.out.println("  0 1 2");
+        for (int i = 0; i < 3; i++) {
+            System.out.print(i + " ");
+            for (int j = 0; j < 3; j++) {
+                System.out.print(board[i][j] == EMPTY ? "-" : board[i][j]);
+                if (j < 2) System.out.print("|");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    private boolean isFull() {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i][j] == EMPTY) return false;
+        return true;
+    }
+
+    // Check if the given player has won
+    private boolean isWin(char player) {
+        // rows & cols
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] == player && board[i][1] == player && board[i][2] == player) return true;
+            if (board[0][i] == player && board[1][i] == player && board[2][i] == player) return true;
+        }
+        // diagonals
+        if (board[0][0] == player && board[1][1] == player && board[2][2] == player) return true;
+        if (board[0][2] == player && board[1][1] == player && board[2][0] == player) return true;
+        return false;
+    }
+
+    // Human move (asks for row and column)
+    private void humanMove() {
+        while (true) {
+            System.out.print("Enter your move (row and column: 0 1): ");
+            String line = scanner.nextLine().trim();
+            String[] parts = line.split("\\s+");
+            if (parts.length != 2) {
+                System.out.println("Please enter two numbers separated by space.");
+                continue;
+            }
+            try {
+                int r = Integer.parseInt(parts[0]);
+                int c = Integer.parseInt(parts[1]);
+                if (r < 0 || r > 2 || c < 0 || c > 2) {
+                    System.out.println("Row and column must be 0, 1, or 2.");
+                    continue;
+                }
+                if (board[r][c] != EMPTY) {
+                    System.out.println("Cell already taken. Choose another.");
+                    continue;
+                }
+                board[r][c] = HUMAN;
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid numbers. Try again.");
+            }
+        }
+    }
+
+    // Simple random move (used only for 'easy' mode)
+    private void randomMove() {
+        int r, c;
+        do {
+            r = rand.nextInt(3);
+            c = rand.nextInt(3);
+        } while (board[r][c] != EMPTY);
+        board[r][c] = AI;
+    }
+
+    // AI move using Minimax (unbeatable)
+    private void aiMoveMinimax() {
+        int bestScore = Integer.MIN_VALUE;
+        int bestR = -1, bestC = -1;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == EMPTY) {
+                    board[i][j] = AI;
+                    int score = minimax(false);
+                    board[i][j] = EMPTY;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestR = i;
+                        bestC = j;
+                    }
+                }
+            }
+        }
+        board[bestR][bestC] = AI;
+    }
+
+    // Minimax algorithm (returns score from AI perspective)
+    private int minimax(boolean isAiTurn) {
+        if (isWin(AI)) return +10;
+        if (isWin(HUMAN)) return -10;
+        if (isFull()) return 0;
+
+        if (isAiTurn) {
+            int best = Integer.MIN_VALUE;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] == EMPTY) {
+                        board[i][j] = AI;
+                        best = Math.max(best, minimax(false));
+                        board[i][j] = EMPTY;
+                    }
+                }
+            }
+            return best;
+        } else {
+            int best = Integer.MAX_VALUE;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] == EMPTY) {
+                        board[i][j] = HUMAN;
+                        best = Math.min(best, minimax(true));
+                        board[i][j] = EMPTY;
+                    }
+                }
+            }
+            return best;
+        }
+    }
+
+    // Game loop for human vs AI
+    private void playHumanVsAI(boolean humanStarts, boolean useMinimax) {
+        boolean humanTurn = humanStarts;
+        printBoard();
+        while (true) {
+            if (humanTurn) {
+                humanMove();
+            } else {
+                System.out.println("AI is thinking...");
+                if (useMinimax) aiMoveMinimax();
+                else randomMove();
+            }
+            printBoard();
