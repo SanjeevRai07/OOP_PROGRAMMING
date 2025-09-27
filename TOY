@@ -1,0 +1,34 @@
+class Toy {
+    String name;
+    String color;
+    double price;
+
+    // Constructor
+    Toy(String name, String color, double price) {
+        this.name = name;
+        this.color = color;
+        this.price = price;
+    }
+
+    // Method to display toy details
+    void displayToy() {
+        System.out.println("Toy Name: " + name);
+        System.out.println("Toy Color: " + color);
+        System.out.println("Toy Price: ₹" + price);
+        System.out.println("-------------------------");
+    }
+}
+
+public class ToyShop {
+    public static void main(String[] args) {
+        // Creating toy objects
+        Toy toy1 = new Toy("Teddy Bear", "Brown", 500);
+        Toy toy2 = new Toy("Car", "Red", 300);
+        Toy toy3 = new Toy("Doll", "Pink", 400);
+
+        // Displaying toys
+        toy1.displayToy();
+        toy2.displayToy();
+        toy3.displayToy();
+    }
+}
